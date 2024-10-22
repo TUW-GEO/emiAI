@@ -1,3 +1,5 @@
+![emiAI logo](logo/emiai_medium.png)
+
 # emiAI
 
 emiAI is a framework for the "inversion" of electromagnetic 
