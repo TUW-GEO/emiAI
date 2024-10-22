@@ -15,6 +15,25 @@ EC depth models with 4, 6 and 12 depth layers.
 2. Training and evaluation of the DL network
 3. Prediction of the 1D vertical EC models. 
 
+## Installation
+
+can be installed by 
+
+> ```bash
+> conda env create -f environment.yml
+> ```
+
+However important contributions are 
+
+https://gitlab.com/hkex/resipy
+https://gitlab.com/hkex/emagpy
+https://github.com/keras-team/keras
+
+## Usage
+
+state the workflow and what the scripts do, where can changes be done
+
+explain the settings in generator script in detail 
 
 ## Citation ##
 
@@ -31,13 +50,3 @@ researchers can access the exact research artefact you used for reproducibility.
 You can find additional information regarding DOI versioning at
 http://help.zenodo.org/#versioning
 
-
-## Installation
- 
-> ```bash
-> conda env create -f environment.yml
-> ```
-
-## Usage
-
-## Compatibility
