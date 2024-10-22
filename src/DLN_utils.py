@@ -1,12 +1,8 @@
 import glob
-import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
-from LS_forward_model import *
 
 
 def prepareEMIdata4DLN(path_emi: str, path_out: str):
@@ -23,33 +19,6 @@ def prepareEMIdata4DLN(path_emi: str, path_out: str):
     data_out[:, 1] = df['Cond.2 [mS/m]'] / 1000
     data_out[:, 2] = df['Cond.3 [mS/m]'] / 1000
     np.save(path_out, data_out)
-
-
-def forwardResponseForPredictedModel(ECmodel_predicted, depth, **kwargs):
-    """
-    """
-    if np.shape(ECmodel_predicted)[1] > np.shape(ECmodel_predicted)[0]:
-        ECmodel_predicted = ECmodel_predicted.T
-
-    output_len = len(ECmodel_predicted)
-    coiloffset = kwargs.get('coiloffset', [0.32, 0.71, 1.18])
-
-    ECa_hcp = np.empty((output_len, 3))
-    ECa_vcp = np.empty((output_len, 3))
-
-    for idx_off, offset in enumerate(coiloffset):
-
-        for idx in range(0, output_len):
-
-            print('Processing model: {}/{}'.format(idx, output_len))
-
-            hcp, vcp = computeForwardResponse(
-                depth, ECmodel_predicted[idx, :], offset, 2 * np.pi * 10000)
-
-            ECa_hcp[idx, idx_off] = hcp
-            ECa_vcp[idx, idx_off] = vcp
-
-    return ECa_vcp, ECa_hcp
 
 
 def prepareInputOutput(input: np.array, output: np.array, nfeatures=1):
