@@ -1,0 +1,20 @@
+01 - generate the pseudo random 1D EC models from ERT data 
+02 - downsample and aggregate the models into composite model 
+03 - do the forward modelling and prepare data set for DL network 
+04 - train the DL network 
+05 - predict EC models from 3 VCP values 
+
+01_generate_1Dmodels.py
+Generates pseudo-random 1D EC models based on ERT sections, does downsampling 
+and aggregation. See config.json for settings. 
+
+02_compute_forward_response.py 
+For the generated EC models compute the forward response as VCP and HCP with 
+EMagPy. 
+
+03_DLN_train.py 
+Train the deep learning network, sequentially for the three subnets and save 
+the training statistics and models. 
+
+04_DLN_predict.py 
+Do the prediction for a field dataset and plot the results. 

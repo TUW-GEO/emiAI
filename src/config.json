@@ -1,0 +1,94 @@
+{
+  "PATH_DATA": "../data/ert/",
+  "PATH_OUT": "../data/dl/training_data/",
+  "FID_LIST": [
+    "B1_1",
+    "B1_2",
+    "B2_1",
+    "B2_2",
+    "B3_1",
+    "B3_2",
+    "B4_1",
+    "B5_1",
+    "B6_1",
+    "B6_2",
+    "B7_1",
+    "B7_2",
+    "B8_1"
+  ],
+  "_FID_LIST": [
+      "B8_1"
+  ],
+  "DEPTH": 1.5,
+  "NLAYERS": 12,
+  "NMODELS": 250,
+  "NEXTRACTION_RANGE": [
+    5,
+    15
+  ],
+  "SIDE_SKIP": 4,
+  "EXTRACTION_WIDTH_SCALER": 1.5,
+  "LAYER_EDGES": [
+    0,
+    0.12,
+    0.24,
+    0.36,
+    0.48,
+    0.6,
+    0.72,
+    0.84,
+    0.96,
+    1.08,
+    1.2,
+    1.32,
+    1.5
+  ],
+  "LAYER_EDGES_6": [
+    0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5
+  ],
+  "LAYER_EDGES_4": [
+    0,
+    0.37,
+    0.75,
+    1.12,
+    1.5
+  ],
+  "TOTAL_OFFSET": 0,
+  "N0_THICKNESS": 0.1,
+  "N0_OFFSET": 0,
+  "N0_SCALER": 1,
+  "NEND_SCALER": 0.1,
+  "RESTRICT_NEND": true,
+  "DISTRIBUTION": "normal",
+  "SMOOTHER": {
+    "smoother": "convolve",
+    "npoints": 3,
+    "order": 2,
+    "apply_all": false
+  },
+  "_SMOOTHER": {
+    "smoother": "savgol",
+    "npoints": 3,
+    "order": 2,
+    "apply_all": false
+  },
+  "BOUNDS": [
+    0.01,
+    1000
+  ],
+  "EXAG_FACTORS": [
+    7,
+    7
+  ],
+  "REVERSE": true,
+  "ER_PLOT_RANGE": [
+    10,
+    70
+  ]
+}

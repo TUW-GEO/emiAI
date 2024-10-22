@@ -1,0 +1,86 @@
+
+
+ >> cR2  C o m p l e x   R e s i s t i v i t y   I n v e r s i o n  v3.0 <<
+
+ >> Author: Andrew Binley, Email [a.binley@lancaster.ac.uk]
+
+ >> D a t e : 05 - 08 - 2021
+
+ >> My beautiful survey                                                             
+ >> Reading start resistivity from res0.dat                      
+ >> D a t a   w e i g h t s   w i l l   b e  m o d i f i e d <<
+
+    Data weight parameters:
+      Relative error of magnitudes:                       0.020
+      Absolute error of phases (mrad):                    2.000
+      Min. allowable app. resistivity:               -0.100E+11
+      Max. allowable app. resistivity:                0.100E+11
+
+
+
+ Processing dataset   1
+
+
+ Measurements read:  2053  Measurements rejected:    0
+ Geometric mean of apparent resistivities:  0.31514E+02
+
+ During the inversion measurements may be ignored because their polarity is not consistent
+ with the forward model response. This is quite normal early on in the inversion but 
+ (only for non-surface electrode surveys) the polarity of the forward model can change and
+ these ignored measurements may then be incorporated in subsequent iterations.
+ The number being ignored will be reported each iteration
+
+   Iteration   1
+     Initial RMS Misfit:       93.059    Number of data ignored:     0
+     Alpha:         757.693   RMS Misfit:        2.60  Roughness:       19.603
+     Alpha:         351.690   RMS Misfit:        2.57  Roughness:       20.645
+     Alpha:         163.240   RMS Misfit:        2.50  Roughness:       32.482
+     Alpha:          75.769   RMS Misfit:        2.61  Roughness:       43.263
+     Step length set to    1.00000
+     Final RMS Misfit:        2.50
+     Updated data weights
+
+   Iteration   2
+     Initial RMS Misfit:        1.799    Number of data ignored:     0
+     Alpha:          88.699   RMS Misfit:        0.82  Roughness:       31.738
+     Step length set to    1.00000
+     Final RMS Misfit:        0.82
+     Step length set to    0.62168
+     Final RMS Misfit:        1.03
+
+ Final phase improvement
+
+   Iteration   1
+     Initial Phase RMS Misfit:        1.044    Number of data ignored:     0
+     Alpha:       77458.093  Phase RMS Misfit:        0.22  Roughness:        0.000
+     Phase RMS Misfit:       0.224
+
+ Solution converged - Outputing results to file
+
+
+ Processing dataset   2
+
+
+
+ End of data:  Terminating
+
+
+     Timing Summary
+     ==============
+     Total time taken:                                812. s
+
+     Percent time taken forming element equations:     0.1 %
+     Percent time taken solving forward  equations:   31.7 %
+     Percent time taken forming Jacobian:             10.8 %
+     Percent time taken solving inverse equations:    56.2 %
+
+     Timing Details
+     ==============
+     Number of calls to form element equations:        165
+     Average time taken in call:                     0.004 s
+     Number of calls to solve forward equations:     11880
+     Average time taken in call:                     0.022 s
+     Number of calls to form Jacobian:                  45
+     Average time taken in call:                     1.944 s
+     Number of calls to solve inverse equations:         6
+     Average time taken in call:                    76.061 s

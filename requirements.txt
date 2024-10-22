@@ -1,0 +1,7 @@
+resipy
+emagpy 
+fiona 
+geopandas 
+keras 
+numpy
+pandas 
