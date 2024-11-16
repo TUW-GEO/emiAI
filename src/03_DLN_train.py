@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import tensorflow
 import tensorflow as tf
-import tensorflow_probability as tfp
 from tensorflow import keras
 from tensorflow.keras import layers
 
@@ -19,39 +18,6 @@ from plotting_utils import (plotAll1DModels,
                             plotTrainingEvolution)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-
-# Define the prior weight distribution as Normal of mean=0 and stddev=1.
-# Note that, in this example, the we prior distribution is not trainable,
-# as we fix its parameters.
-def prior(kernel_size, bias_size, dtype=None):
-    n = kernel_size + bias_size
-    prior_model = keras.Sequential(
-        [
-            tfp.layers.DistributionLambda(
-                lambda t: tfp.distributions.MultivariateNormalDiag(
-                    loc=tf.zeros(n), scale_diag=tf.ones(n)
-                )
-            )
-        ]
-    )
-    return prior_model
-
-
-# Define variational posterior weight distribution as multivariate Gaussian.
-# Note that the learnable parameters for this distribution are the means,
-# variances, and covariances.
-def posterior(kernel_size, bias_size, dtype=None):
-    n = kernel_size + bias_size
-    posterior_model = keras.Sequential(
-        [
-            tfp.layers.VariableLayer(
-                tfp.layers.MultivariateNormalTriL.params_size(n), dtype=dtype
-            ),
-            tfp.layers.MultivariateNormalTriL(n),
-        ]
-    )
-    return posterior_model
 
 
 def trainSubnet4x1(path_input: str, path_out: str,
@@ -123,23 +89,14 @@ def trainSubnet4x1(path_input: str, path_out: str,
                                       restore_best_weights=True)]
 
     # seed(0)
-    tensorflow.random.set_seed(0)
+    # tensorflow.random.set_seed(0)
 
     model = keras.Sequential()
     model.add(keras.Input(shape=(3,)))
-    model.add(tpf.layers.DenseVariational(units=6,
-                                          make_prior_fn=prior,
-                                          make_posterior_fn=posterior,
-                                          kl_weight=1/len(input),
-                                          activation='sigmoid'))
-    model.add(tpf.layers.DenseVariational(units=6,
-                                          make_prior_fn=prior,
-                                          make_posterior_fn=posterior,
-                                          kl_weight=1/len(input),
-                                          activation='sigmoid'))
-    distribution_params = keras.layers.Dense(units=2)(4)
-    model.add(tfp.layers.IndependentNormal(1)(distribution_params))
-    # model.add(keras.layers.Flatten())
+    model.add(keras.layers.Dense(6, activation='relu'))
+    model.add(keras.layers.Dense(6, activation='relu'))
+    model.add(keras.layers.Dense(4, activation=None))
+    model.add(keras.layers.Flatten())
     print(model.summary())
 
     # compile, fit and evaluate model
@@ -288,7 +245,7 @@ def trainSubnet6x1(path_input: str,
                                       restore_best_weights=True)]
 
     # seed(0)
-    tensorflow.random.set_seed(0)
+    # tensorflow.random.set_seed(0)
 
     model = keras.Sequential()
     model.add(keras.Input(shape=(6,)))
@@ -445,7 +402,7 @@ def trainSubnet12x1(path_input: str,
                                       restore_best_weights=True)]
 
     # set seed
-    tensorflow.random.set_seed(0)
+    # tensorflow.random.set_seed(0)
 
     model = keras.Sequential()
     model.add(keras.Input(shape=(6,)))
@@ -532,6 +489,9 @@ def trainSubnet12x1(path_input: str,
 def main():
 
     FWD_MODEL = 'CS'
+    NMODELS = 25
+    ENSEMBLE_12x1 = []
+    print('runnin branch')
 
     CLIMITS1 = [1, 80]
     CLIMITS2 = [1, 80]
@@ -559,55 +519,65 @@ def main():
     EC12x1_train = np.load(PATH_IN_12x1 + os.sep + 'EC.npy',
                            allow_pickle=True)
 
-    # train the first subnet: 4x1
-    model_and_data4x1, hist_eval4x1, depth4x1 = trainSubnet4x1(
-        PATH_IN_4x1,
-        PATH_OUT_4x1)
-    model4x1, ECa4x1_input, scalers4x1 = model_and_data4x1
-    tr_history4x1, evaluation4x1 = hist_eval4x1
+    for member in range(0, NMODELS):
 
-    # # make predictions
-    # EC4x1_predicted = performModelPrediction(ECa4x1_input.T,
-    #                                          model4x1,
-    #                                          scalers4x1[0],
-    #                                          scalers4x1[1])
+        # train the first subnet: 4x1
+        model_and_data4x1, hist_eval4x1, depth4x1 = trainSubnet4x1(
+            PATH_IN_4x1,
+            PATH_OUT_4x1)
+        model4x1, ECa4x1_input, scalers4x1 = model_and_data4x1
+        tr_history4x1, evaluation4x1 = hist_eval4x1
 
-    # ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr = computeForwardModel(
-    #     EC4x1_predicted, depth4x1,
-    #     forward_model=FWD_MODEL)
+        # make predictions
+        EC4x1_predicted = performModelPrediction(ECa4x1_input.T,
+                                                 model4x1,
+                                                 scalers4x1[0],
+                                                 scalers4x1[1])
 
-    # # train the second subnet: 6x1
-    # model_and_data6x1, hist_eval6x1, depth6x1 = trainSubnet6x1(
-    #     PATH_IN_6x1,
-    #     PATH_OUT_6x1,
-    #     np.hstack([ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr]))
-    # model6x1, ECa6x1_input, scalers6x1 = model_and_data6x1
-    # tr_history6x1, evaluation6x1 = hist_eval6x1
+        ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr = computeForwardModel(
+            EC4x1_predicted, depth4x1,
+            forward_model=FWD_MODEL)
 
-    # # make predictions
-    # EC6x1_predicted = performModelPrediction(ECa6x1_input.T,
-    #                                          model6x1,
-    #                                          scalers6x1[0],
-    #                                          scalers6x1[1])
+        # train the second subnet: 6x1
+        model_and_data6x1, hist_eval6x1, depth6x1 = trainSubnet6x1(
+            PATH_IN_6x1,
+            PATH_OUT_6x1,
+            np.hstack([ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr]))
+        model6x1, ECa6x1_input, scalers6x1 = model_and_data6x1
+        tr_history6x1, evaluation6x1 = hist_eval6x1
 
-    # ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr = computeForwardModel(
-    #     EC6x1_predicted, depth6x1,
-    #     forward_model=FWD_MODEL)
+        # make predictions
+        EC6x1_predicted = performModelPrediction(ECa6x1_input.T,
+                                                 model6x1,
+                                                 scalers6x1[0],
+                                                 scalers6x1[1])
 
-    # # train the third subnet: 12x1
-    # model_and_data12x1, hist_eval12x1, depth12x1 = trainSubnet12x1(
-    #     PATH_IN_12x1,
-    #     PATH_OUT_12x1,
-    #     np.hstack([ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr]))
-    # model12x1, ECa12x1_input, scalers12x1 = model_and_data12x1
-    # tr_history12x1, evaluation12x1 = hist_eval12x1
+        ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr = computeForwardModel(
+            EC6x1_predicted, depth6x1,
+            forward_model=FWD_MODEL)
 
-    # # make predictions
-    # EC12x1_predicted = performModelPrediction(ECa12x1_input.T,
-    #                                           model12x1,
-    #                                           scalers12x1[0],
-    #                                           scalers12x1[1])
+        # train the third subnet: 12x1
+        model_and_data12x1, hist_eval12x1, depth12x1 = trainSubnet12x1(
+            PATH_IN_12x1,
+            PATH_OUT_12x1,
+            np.hstack([ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr]))
+        model12x1, ECa12x1_input, scalers12x1 = model_and_data12x1
+        tr_history12x1, evaluation12x1 = hist_eval12x1
 
+        ENSEMBLE_12x1.append(model_and_data12x1)
+
+    ENSEMBLE_PRED = []
+    # make predictions for ensemble
+    for member in ENSEMBLE_12x1:
+
+        model12x1, ECa12x1_input, scalers12x1 = member
+        EC12x1_predicted = performModelPrediction(ECa12x1_input.T,
+                                                  model12x1,
+                                                  scalers12x1[0],
+                                                  scalers12x1[1])
+        ENSEMBLE_PRED.append(EC12x1_predicted)
+
+    return ENSEMBLE_PRED
     # # plotting starts here for all nets
     # hist_list = [tr_history4x1, tr_history6x1, tr_history12x1]
     # eval_list = [evaluation4x1, evaluation6x1, evaluation12x1]
@@ -649,4 +619,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ensemble = main()
