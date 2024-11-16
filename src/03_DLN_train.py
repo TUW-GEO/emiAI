@@ -7,7 +7,10 @@ import joblib
 import numpy as np
 import pandas as pd
 import tensorflow
+import tensorflow as tf
+import tensorflow_probability as tfp
 from tensorflow import keras
+from tensorflow.keras import layers
 
 from DLN_utils import performModelPrediction, prepareInputOutput
 from forward_utils import computeForwardModel
@@ -16,6 +19,39 @@ from plotting_utils import (plotAll1DModels,
                             plotTrainingEvolution)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+
+# Define the prior weight distribution as Normal of mean=0 and stddev=1.
+# Note that, in this example, the we prior distribution is not trainable,
+# as we fix its parameters.
+def prior(kernel_size, bias_size, dtype=None):
+    n = kernel_size + bias_size
+    prior_model = keras.Sequential(
+        [
+            tfp.layers.DistributionLambda(
+                lambda t: tfp.distributions.MultivariateNormalDiag(
+                    loc=tf.zeros(n), scale_diag=tf.ones(n)
+                )
+            )
+        ]
+    )
+    return prior_model
+
+
+# Define variational posterior weight distribution as multivariate Gaussian.
+# Note that the learnable parameters for this distribution are the means,
+# variances, and covariances.
+def posterior(kernel_size, bias_size, dtype=None):
+    n = kernel_size + bias_size
+    posterior_model = keras.Sequential(
+        [
+            tfp.layers.VariableLayer(
+                tfp.layers.MultivariateNormalTriL.params_size(n), dtype=dtype
+            ),
+            tfp.layers.MultivariateNormalTriL(n),
+        ]
+    )
+    return posterior_model
 
 
 def trainSubnet4x1(path_input: str, path_out: str,
@@ -91,10 +127,19 @@ def trainSubnet4x1(path_input: str, path_out: str,
 
     model = keras.Sequential()
     model.add(keras.Input(shape=(3,)))
-    model.add(keras.layers.Dense(6, activation='relu'))
-    model.add(keras.layers.Dense(6, activation='relu'))
-    model.add(keras.layers.Dense(4, activation=None))
-    model.add(keras.layers.Flatten())
+    model.add(tpf.layers.DenseVariational(units=6,
+                                          make_prior_fn=prior,
+                                          make_posterior_fn=posterior,
+                                          kl_weight=1/len(input),
+                                          activation='sigmoid'))
+    model.add(tpf.layers.DenseVariational(units=6,
+                                          make_prior_fn=prior,
+                                          make_posterior_fn=posterior,
+                                          kl_weight=1/len(input),
+                                          activation='sigmoid'))
+    distribution_params = keras.layers.Dense(units=2)(4)
+    model.add(tfp.layers.IndependentNormal(1)(distribution_params))
+    # model.add(keras.layers.Flatten())
     print(model.summary())
 
     # compile, fit and evaluate model
@@ -521,86 +566,86 @@ def main():
     model4x1, ECa4x1_input, scalers4x1 = model_and_data4x1
     tr_history4x1, evaluation4x1 = hist_eval4x1
 
-    # make predictions
-    EC4x1_predicted = performModelPrediction(ECa4x1_input.T,
-                                             model4x1,
-                                             scalers4x1[0],
-                                             scalers4x1[1])
+    # # make predictions
+    # EC4x1_predicted = performModelPrediction(ECa4x1_input.T,
+    #                                          model4x1,
+    #                                          scalers4x1[0],
+    #                                          scalers4x1[1])
 
-    ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr = computeForwardModel(
-        EC4x1_predicted, depth4x1,
-        forward_model=FWD_MODEL)
+    # ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr = computeForwardModel(
+    #     EC4x1_predicted, depth4x1,
+    #     forward_model=FWD_MODEL)
 
-    # train the second subnet: 6x1
-    model_and_data6x1, hist_eval6x1, depth6x1 = trainSubnet6x1(
-        PATH_IN_6x1,
-        PATH_OUT_6x1,
-        np.hstack([ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr]))
-    model6x1, ECa6x1_input, scalers6x1 = model_and_data6x1
-    tr_history6x1, evaluation6x1 = hist_eval6x1
+    # # train the second subnet: 6x1
+    # model_and_data6x1, hist_eval6x1, depth6x1 = trainSubnet6x1(
+    #     PATH_IN_6x1,
+    #     PATH_OUT_6x1,
+    #     np.hstack([ECa4x1_VCP_fwdr, ECa4x1_HCP_fwdr]))
+    # model6x1, ECa6x1_input, scalers6x1 = model_and_data6x1
+    # tr_history6x1, evaluation6x1 = hist_eval6x1
 
-    # make predictions
-    EC6x1_predicted = performModelPrediction(ECa6x1_input.T,
-                                             model6x1,
-                                             scalers6x1[0],
-                                             scalers6x1[1])
+    # # make predictions
+    # EC6x1_predicted = performModelPrediction(ECa6x1_input.T,
+    #                                          model6x1,
+    #                                          scalers6x1[0],
+    #                                          scalers6x1[1])
 
-    ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr = computeForwardModel(
-        EC6x1_predicted, depth6x1,
-        forward_model=FWD_MODEL)
+    # ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr = computeForwardModel(
+    #     EC6x1_predicted, depth6x1,
+    #     forward_model=FWD_MODEL)
 
-    # train the third subnet: 12x1
-    model_and_data12x1, hist_eval12x1, depth12x1 = trainSubnet12x1(
-        PATH_IN_12x1,
-        PATH_OUT_12x1,
-        np.hstack([ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr]))
-    model12x1, ECa12x1_input, scalers12x1 = model_and_data12x1
-    tr_history12x1, evaluation12x1 = hist_eval12x1
+    # # train the third subnet: 12x1
+    # model_and_data12x1, hist_eval12x1, depth12x1 = trainSubnet12x1(
+    #     PATH_IN_12x1,
+    #     PATH_OUT_12x1,
+    #     np.hstack([ECa6x1_VCP_fwdr, ECa6x1_HCP_fwdr]))
+    # model12x1, ECa12x1_input, scalers12x1 = model_and_data12x1
+    # tr_history12x1, evaluation12x1 = hist_eval12x1
 
-    # make predictions
-    EC12x1_predicted = performModelPrediction(ECa12x1_input.T,
-                                              model12x1,
-                                              scalers12x1[0],
-                                              scalers12x1[1])
+    # # make predictions
+    # EC12x1_predicted = performModelPrediction(ECa12x1_input.T,
+    #                                           model12x1,
+    #                                           scalers12x1[0],
+    #                                           scalers12x1[1])
 
-    # plotting starts here for all nets
-    hist_list = [tr_history4x1, tr_history6x1, tr_history12x1]
-    eval_list = [evaluation4x1, evaluation6x1, evaluation12x1]
-    EC_predicted_list = [EC4x1_predicted, EC6x1_predicted,
-                         EC12x1_predicted]
-    EC_train_list = [EC4x1_train, EC6x1_train, EC12x1_train]
-    depths_list = [depth4x1, depth6x1, depth12x1]
-    paths_out_list = [PATH_OUT_4x1, PATH_OUT_6x1, PATH_OUT_12x1]
-    fig_title_list = [
-        ["EC models used as input in subnet 1",
-         "Predicted EC models for subnet 1"],
-        ["EC models used as input in subnet 2",
-         "Predicted EC models for subnet 2"],
-        ["EC models used as input in subnet 3",
-         "Predicted EC models for subnet 3"]]
+    # # plotting starts here for all nets
+    # hist_list = [tr_history4x1, tr_history6x1, tr_history12x1]
+    # eval_list = [evaluation4x1, evaluation6x1, evaluation12x1]
+    # EC_predicted_list = [EC4x1_predicted, EC6x1_predicted,
+    #                      EC12x1_predicted]
+    # EC_train_list = [EC4x1_train, EC6x1_train, EC12x1_train]
+    # depths_list = [depth4x1, depth6x1, depth12x1]
+    # paths_out_list = [PATH_OUT_4x1, PATH_OUT_6x1, PATH_OUT_12x1]
+    # fig_title_list = [
+    #     ["EC models used as input in subnet 1",
+    #      "Predicted EC models for subnet 1"],
+    #     ["EC models used as input in subnet 2",
+    #      "Predicted EC models for subnet 2"],
+    #     ["EC models used as input in subnet 3",
+    #      "Predicted EC models for subnet 3"]]
 
-    for fidx, path in enumerate(paths_out_list):
-        print("Plotting the results for: {}".format(path))
-        plotTrainingEvolution(hist_list[fidx],
-                              eval_list[fidx],
-                              path,
-                              METRICS_AND_LABELS)
-        plotAll1DModels(EC_train_list[fidx], depths_list[fidx],
-                        "EC [mS/m]",
-                        fig_title_list[fidx][0],
-                        CLIMITS1,
-                        path + os.sep + '02_InputEC.png')
-        plotAll1DModels(EC_predicted_list[fidx], depths_list[fidx],
-                        "Predicted EC [mS/m]",
-                        fig_title_list[fidx][1],
-                        CLIMITS1,
-                        path + os.sep + '03_PredictedEC.png')
-        plotRegressionsTrainingAndPredictedEC(
-            EC_predicted_list[fidx],
-            EC_train_list[fidx],
-            depths_list[fidx],
-            limits=CLIMITS2,
-            path_plot=path + os.sep + '04_Regression.png')
+    # for fidx, path in enumerate(paths_out_list):
+    #     print("Plotting the results for: {}".format(path))
+    #     plotTrainingEvolution(hist_list[fidx],
+    #                           eval_list[fidx],
+    #                           path,
+    #                           METRICS_AND_LABELS)
+    #     plotAll1DModels(EC_train_list[fidx], depths_list[fidx],
+    #                     "EC [mS/m]",
+    #                     fig_title_list[fidx][0],
+    #                     CLIMITS1,
+    #                     path + os.sep + '02_InputEC.png')
+    #     plotAll1DModels(EC_predicted_list[fidx], depths_list[fidx],
+    #                     "Predicted EC [mS/m]",
+    #                     fig_title_list[fidx][1],
+    #                     CLIMITS1,
+    #                     path + os.sep + '03_PredictedEC.png')
+    #     plotRegressionsTrainingAndPredictedEC(
+    #         EC_predicted_list[fidx],
+    #         EC_train_list[fidx],
+    #         depths_list[fidx],
+    #         limits=CLIMITS2,
+    #         path_plot=path + os.sep + '04_Regression.png')
 
 
 if __name__ == "__main__":
