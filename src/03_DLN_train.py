@@ -577,7 +577,15 @@ def main():
                                                   scalers12x1[1])
         ENSEMBLE_PRED.append(EC12x1_predicted)
 
-    return ENSEMBLE_PRED
+    EC12x1_predicted = np.zeros((np.shape(ENSEMBLE_PRED)[1], 12))
+    EC12x1_predicted_std = np.zeros((np.shape(ENSEMBLE_PRED)[1], 12))
+    for data in range(0, np.shape(ENSEMBLE_PRED)[1]):
+        for depth in range(0, 12):
+            a = [ENSEMBLE_PRED[idx][data][depth]
+                 for idx in range(0, np.shape(ENSEMBLE_PRED)[0])]
+            EC12x1_predicted[data, :] = np.median(a, axis=1)
+            EC12x1_predicted_std[data, :] = np.std(a, axis=1)
+
     # # plotting starts here for all nets
     # hist_list = [tr_history4x1, tr_history6x1, tr_history12x1]
     # eval_list = [evaluation4x1, evaluation6x1, evaluation12x1]
@@ -619,4 +627,4 @@ def main():
 
 
 if __name__ == "__main__":
-    ensemble = main()
+    main()
