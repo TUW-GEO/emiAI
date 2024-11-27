@@ -33,9 +33,31 @@ https://github.com/keras-team/keras
 
 ## Usage
 
-state the workflow and what the scripts do, where can changes be done
+The workflow consists of running the numbered Python scripts in sequence:
 
-explain the settings in generator script in detail 
+> ```bash
+> python 01_generate_1Dmodels.py
+> python 02_compute_forward_response.py
+> python 03_DLN_train.py
+> python 04_DLN_predict.py
+> ```
+
+The script `01_generate_1Dmodels.py` does parse a .json file (`settings.json`) containing settings and some keyword parameters can be set upon calling the script. For all other scripts, parameters have to be changed in the scripts directly. 
+
+The keyword parameters in `01_generate_1Dmodels.py` are:
+
+- `--plot`: Plot the figures during model generation. This includes the newly 
+random generated models, the binning results as well as indication of the sampling
+locations. 
+- `--aggregate`: Upon model generation aggregate all models for each profile into
+a composite model. This composite model can be used for downsampling and is the 
+input for the forward computation and training of the DL network.
+- `--aggregate_only`: Only aggregate the newly generated models without new model 
+generation. This option uses the in the `settings.json` specified profiles. 
+- `--downsample`: The DL network requires the training data for 3 different depth 
+models with 12, 6 and 4 layers. This option downsamples the composite model for the in 
+`settings.json` specified models. 
+
 
 ## Citation ##
 
