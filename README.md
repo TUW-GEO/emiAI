@@ -17,16 +17,18 @@ EC depth models with 4, 6 and 12 depth layers.
 
 ## Installation
 
-can be installed by 
+Install the required packages and dependencies in new conda environment:
 
 > ```bash
 > conda env create -f environment.yml
 > ```
 
-However important contributions are 
+This work would not have been possible withou many other open-source libraries, so please have also a look at the following repositories and consider citing the corresponding articles:
 
 https://gitlab.com/hkex/resipy
+
 https://gitlab.com/hkex/emagpy
+
 https://github.com/keras-team/keras
 
 ## Usage
