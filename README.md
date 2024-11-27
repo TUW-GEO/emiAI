@@ -88,12 +88,12 @@ The different options in `config.json` are:
 
 ## Citation ##
 
-[![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.4610836.svg)](https://doi.org/10.5281/zenodo.4610836)
+[![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.13968655.svg)](https://doi.org/10.5281/zenodo.13968655)
 
 If you use the software in a publication then please cite it using the Zenodo
 DOI. Be aware that this badge links to the latest package version.
 
-Please select your specific version at https://doi.org/10.5281/zenodo.4610836 to
+Please select your specific version at https://doi.org/10.5281/zenodo.13968655 to
 get the DOI of that version. You should normally always use the DOI for the
 specific version of your record in citations. This is to ensure that other
 researchers can access the exact research artefact you used for reproducibility.
